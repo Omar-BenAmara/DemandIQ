@@ -88,6 +88,19 @@ class FeatureEngineeringInvariantTests(unittest.TestCase):
         history_columns = ["lag_1", "lag_7", "lag_14", "lag_28", "rolling_mean_7", "rolling_median_7", "rolling_std_7"]
         pd.testing.assert_frame_equal(original[["Store", *history_columns]], changed[["Store", *history_columns]])
 
+    def test_missing_calendar_observation_is_not_treated_as_zero(self):
+        origin = pd.Timestamp("2015-03-31")
+        incomplete = self.frame.loc[
+            ~((self.frame.Store == 1) & (self.frame.Date == origin - pd.Timedelta(days=3)))
+        ]
+        history = self.features["build_frozen_history"](incomplete, origin)
+        row = history[history.Store.eq(1)].iloc[0]
+
+        self.assertTrue(pd.isna(row["rolling_mean_7"]))
+        self.assertTrue(pd.isna(row["rolling_median_7"]))
+        self.assertTrue(pd.isna(row["rolling_std_7"]))
+        self.assertEqual(row["store_history_count"], len(incomplete[(incomplete.Store == 1) & (incomplete.Date <= origin)]))
+
     def test_validation_rows_are_after_origin_and_targets_are_separate(self):
         origin = pd.Timestamp("2015-03-31")
         base = self.features["add_store_time_features"](self.frame)
