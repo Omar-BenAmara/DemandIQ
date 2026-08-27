@@ -27,6 +27,9 @@ data/raw/
 *.xlsx
 *.parquet
 
+# Generated modeling artifacts
+artifacts/*.png
+
 # ================================
 # OS
 # ================================
