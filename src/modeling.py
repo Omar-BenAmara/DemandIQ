@@ -36,6 +36,11 @@ def encode_tree_frame(frame, feature_columns, medians=None, category_maps=None):
     return result
 
 
+def informative_columns(encoded_frame):
+    """Return columns with at least two observed values for tree binning."""
+    return [column for column in encoded_frame.columns if encoded_frame[column].nunique(dropna=True) > 1]
+
+
 def score_predictions(actual, predicted):
     actual = np.asarray(actual, dtype="float64")
     predicted = np.asarray(predicted, dtype="float64")

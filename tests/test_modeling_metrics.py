@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from src.metrics import mae, rmse, rmspe
-from src.modeling import inverse_target, make_submission, transform_target
+from src.modeling import informative_columns, inverse_target, make_submission, transform_target
 
 
 class ModelingMetricTests(unittest.TestCase):
@@ -29,6 +29,10 @@ class ModelingMetricTests(unittest.TestCase):
         frame = pd.DataFrame({"Id": [3, 1], "Date": pd.to_datetime(["2015-08-01", "2015-08-02"])})
         submission = make_submission(frame, [2.0, 4.0], "tests/_submission_test.csv")
         self.assertEqual(list(submission.columns), ["Id", "Sales"])
+
+    def test_constant_columns_are_excluded_from_tree_inputs(self):
+        frame = pd.DataFrame({"constant": [1, 1], "varying": [1, 2]})
+        self.assertEqual(informative_columns(frame), ["varying"])
 
 
 if __name__ == "__main__":
